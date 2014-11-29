@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+<meta charset="utf-8">
+
+<!--
+
+ _____ _           __                                _ _             
+|_   _| |         / _|                              | (_)            
+  | | | | _____  | |_ ___  _ __   _ __ ___  __ _  __| |_ _ __   __ _ 
+  | | | |/ / __| |  _/ _ \| '__| | '__/ _ \/ _` |/ _` | | '_ \ / _` |
+  | | |   <\__ \ | || (_) | |    | | |  __/ (_| | (_| | | | | | (_| |
+  \_/ |_|\_\___/ |_| \___/|_|    |_|  \___|\__,_|\__,_|_|_| |_|\__, |
+                                                                __/ |
+                                                               |___/ 
+                                 _      
+                                | |     
+ _ __ ___  _   _    ___ ___   __| | ___ 
+| '_ ` _ \| | | |  / __/ _ \ / _` |/ _ \
+| | | | | | |_| | | (_| (_) | (_| |  __/
+|_| |_| |_|\__, |  \___\___/ \__,_|\___|
+            __/ |                       
+           |___/                        
+
+______ _                       _      _                      _                        
+| ___ \ |                     | |    | |                    | |                       
+| |_/ / | ___  __ _ ___  ___  | | ___| |_   _ __ ___   ___  | | ___ __   _____      __
+|  __/| |/ _ \/ _` / __|/ _ \ | |/ _ \ __| | '_ ` _ \ / _ \ | |/ / '_ \ / _ \ \ /\ / /
+| |   | |  __/ (_| \__ \  __/ | |  __/ |_  | | | | | |  __/ |   <| | | | (_) \ V  V / 
+\_|   |_|\___|\__,_|___/\___| |_|\___|\__| |_| |_| |_|\___| |_|\_\_| |_|\___/ \_/\_/  
+                                                                                      
+                                                                   _       
+                                                                  | |      
+ _   _  ___  _   _ _ __    ___ ___  _ __ ___  _ __ ___   ___ _ __ | |_ ___ 
+| | | |/ _ \| | | | '__|  / __/ _ \| '_ ` _ \| '_ ` _ \ / _ \ '_ \| __/ __|
+| |_| | (_) | |_| | |    | (_| (_) | | | | | | | | | | |  __/ | | | |_\__ \
+ \__, |\___/ \__,_|_|     \___\___/|_| |_| |_|_| |_| |_|\___|_| |_|\__|___/
+  __/ |                                                                    
+ |___/                                                                     
+
+
+Kelvin
+
+-->
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="cache-control" content="no-cache" />
+<title>The Hungry Games</title>
+<meta name="author" content="Kelvin">
+<meta name="description" content="Just for fun">
+<meta name="viewport" content="width=1300, initial-scale=1">
+<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic,700italic" rel="stylesheet" type="text/css">
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+{% if mode == 'dev' %}
+<link rel="stylesheet" href="{{ url_for('static', filename='dev_kelvin/css/all.css') }}">
+{% else %}
+<link rel="stylesheet" href="{{ url_for('static', filename='prod/css/all.min.css') }}">
+{% endif %}
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}" />
+</head>
+<body ng-app="hungry">
+{% raw %}
+<div id="app" ng-controller="hungryCtrl" ng-cloak>
+    <div id="popup" class="">
+    </div>
+    <aside id="left">
+        <header>logo</header>
+        <div id="shop">
+            <div class="wrapper">
+                <h2>Shops</h2>
+                <ul>
+                    <li ng-repeat="shop in shops" ng-click="selectShop($index)" ng-class="isMyShop($index)">
+                    <span class="shop-name">{{ shop.name }}</span>
+                    <span class="shop-score">{{ shop.voter.length }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <a id="add-shop" ng-click="addShop()"><input type="text" id="input-shop" ng-show="addingShop" placeholder="Press <enter> to add" />Add a shop</a>
+    </aside>
+    <section id="main">
+        <header>
+            <div id="progress" style="width:{{ progressWidth }}">
+                <span>Time left</span>
+                <h3 id="timer">{{ timeLeft }}</h3>
+            </div>
+            <span>Time left</span>
+            <h3 id="timer-shadow">{{ timeLeft }}</h3>
+        </header>
+        <div id="vote">
+            <div class="wrapper">
+                <div id="rows">
+                    <div class="row element-item {{shop.champion}}" ng-repeat="shop in shops | sortVotedShops | makeChampion">
+                        <section>
+                            <div class="score">{{shop.voter.length}}</div>
+                            <span>{{shop.name}}</span>
+                        </section>
+                        <div class="ppls">
+                            <div ng-repeat="peopleId in shop.voter" class="ppl element-item" >
+                                <img ng-src="../static/images/{{peoplesList[peopleId]}}.jpg" />
+                                <span ng-bind="peoplesList[peopleId]"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <aside id="right">
+        <header>
+            <div class="not-joined" ng-hide="joined">Please select your name<br /><i class="fa fa-angle-down"></i></div>
+            <div class="joined" ng-show="joined" ng-click="selectPeople(myId)" ng-switch on="joined">
+                <img ng-switch-when="true" ng-src="../static/images/{{myName}}.jpg" /><span>{{ myName }}</span>
+            </div>
+        </header>
+        <div id="people">
+            <div class="wrapper">
+                <h2>Online</h2>
+                <ul id="online">
+                    <li ng-repeat="people in peoples | filter:{joined:true}" ng-click="selectPeople(people.id)" ng-class="isMe(people.id)">
+                    <img ng-src="../static/images/{{people.name}}.jpg" />
+                    <span>{{people.name}}</span>
+                    </li>
+                </ul>
+                <h2>Offline</h2>
+                <ul id="offline">
+                    <li ng-repeat="people in peoples | filter:{joined:false}" ng-click="selectPeople(people.id)" >
+                    <img ng-src="../static/images/{{people.name}}.jpg" />
+                    <span>{{people.name}}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </aside>
+</div>
+<div id="bg"></div>
+{% endraw %}
+{% if mode == 'dev' %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+<script src="{{ url_for('static', filename='dev_kelvin/js/main.js') }}"></script>
+{% else %}
+<script src="{{ url_for('static', filename='prod/js/compiled.min.js') }}"></script>
+{% endif %}
+</body>
+</html>
