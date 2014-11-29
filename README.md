@@ -14,10 +14,10 @@ Just a toy for learning Python & socketio based live webapp, using python flask 
  4. python run_server.py
 
 ### What's next
- - rooms (and topic)
+ - rooms with topics
  - DB (managing settings & data)
- - user acc 
- - admin page (cancel room, kick someone out, etc.)
- - redesign
+ - statistic
+ - user acc
+ - admin page (cancel a room, kick someone out, etc.)
  - better timer mechanism
- - refactor
+ - redesign & refactor..
